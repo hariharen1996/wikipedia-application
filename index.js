@@ -1,7 +1,13 @@
+import paginationBtn from "./displayButtons.js";
+import paginate from "./pagination.js";
+
 let searchInputEl = document.getElementById("searchInput");
 let searchResultsEl = document.getElementById("searchResults");
 let spinnerEl = document.getElementById("spinner");
+let btnConEl = document.querySelector('.btn-container')
 
+let pages = []
+let index = 0;
 
 const displaySpinner = (isVisible) => {
   if(isVisible){
@@ -69,7 +75,7 @@ function displayResults(results) {
 
     searchResultsEl.appendChild(element);
   } else {
-    results.forEach((items) => createAndAppendResults(items));
+    results.map((items) => createAndAppendResults(items));
   }
   displaySpinner(false)
 }
@@ -97,7 +103,10 @@ async function wikipediaSearch(event) {
       const { search_results } = data;
 
       if (search_results.length !== 0) {
-        displayResults(search_results);
+        pages = paginate(search_results)
+        displayResults(pages[index]);
+        paginationBtn(btnConEl,pages,index)
+        //console.log(pages[0])
       }else{
         const element = iconElement(
           "fa-solid",
@@ -124,5 +133,34 @@ async function wikipediaSearch(event) {
     }
   }
 }
+
+btnConEl.addEventListener('click', (e) => {
+  console.log(e.target)
+
+  searchResultsEl.textContent = ''
+
+  let pageId = e.target.dataset.page 
+  console.log(pageId)
+  if(e.target.classList.contains('pagination-btn')){
+    index = +pageId
+  }
+
+  if(e.target.classList.contains('next-btn')){
+    index++;
+    if(index > pages.length - 1){
+      index = 0
+    }
+  }
+
+  if(e.target.classList.contains('prev-btn')){
+    index--;
+    if(index < 0){
+      index = pages.length - 1
+    }
+  }
+
+  displayResults(pages[index]);
+  paginationBtn(btnConEl,pages,index)
+})
 
 searchInputEl.addEventListener("keydown", wikipediaSearch);
