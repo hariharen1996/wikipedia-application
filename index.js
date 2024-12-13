@@ -1,3 +1,4 @@
+import { API_URL } from "./config.js";
 import paginationBtn from "./displayButtons.js";
 import paginate from "./pagination.js";
 
@@ -8,6 +9,11 @@ let btnConEl = document.querySelector('.btn-container')
 
 let pages = []
 let index = 0;
+
+const init = () => {
+  displayResults(pages[index]);
+  paginationBtn(btnConEl,pages,index)
+}
 
 const displaySpinner = (isVisible) => {
   if(isVisible){
@@ -91,10 +97,10 @@ async function wikipediaSearch(event) {
       return;
     }
 
-    const url = "https://apis.ccbp.in/wiki-search?search=" + searchInputElValue;
+    const url = `${API_URL}?search=${searchInputElValue}`;
     const options = {
       method: "GET",
-    };
+    };    
 
     try {
       const response = await fetch(url, options);
@@ -104,8 +110,7 @@ async function wikipediaSearch(event) {
 
       if (search_results.length !== 0) {
         pages = paginate(search_results)
-        displayResults(pages[index]);
-        paginationBtn(btnConEl,pages,index)
+        init()
         //console.log(pages[0])
       }else{
         const element = iconElement(
@@ -114,7 +119,7 @@ async function wikipediaSearch(event) {
           "No results found! :)",
           "alert-warning"
         );
-    
+        
         searchResultsEl.appendChild(element);
         displaySpinner(false)
       }
@@ -159,8 +164,7 @@ btnConEl.addEventListener('click', (e) => {
     }
   }
 
-  displayResults(pages[index]);
-  paginationBtn(btnConEl,pages,index)
+  init()
 })
 
 searchInputEl.addEventListener("keydown", wikipediaSearch);
